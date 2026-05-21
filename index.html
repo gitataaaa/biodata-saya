@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial Integrasi RESTful API - Gita Nopianti</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #151821;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --accent: #6ee7b7;
+    --accent2: #38bdf8;
+    --accent3: #f472b6;
+    --text: #e2e8f0;
+    --muted: #7c8ba1;
+    --code-bg: #0f1520;
+    --tag-green: rgba(110,231,183,0.12);
+    --tag-blue: rgba(56,189,248,0.12);
+    --tag-pink: rgba(244,114,182,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 24px;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    width: 700px; height: 700px;
+    background: radial-gradient(ellipse, rgba(110,231,183,0.08) 0%, transparent 70%);
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(56,189,248,0.07) 0%, transparent 70%);
+    bottom: -100px; right: -100px;
+    pointer-events: none;
+  }
+
+  .header-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--tag-green);
+    border: 1px solid rgba(110,231,183,0.2);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .dot-live {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.8s 0.1s ease both;
+    max-width: 900px;
+  }
+
+  h1 .highlight {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-sub {
+    color: var(--muted);
+    font-size: 1.1rem;
+    max-width: 560px;
+    margin-top: 24px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.8s 0.2s ease both;
+    font-weight: 300;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 40px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .meta-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .meta-chip .icon { font-size: 16px; }
+  .meta-chip span { color: var(--muted); font-size: 12px; display: block; }
+  .meta-chip strong { display: block; color: var(--text); }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    animation: fadeUp 1s 0.6s ease both;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollAnim 2s ease-in-out infinite;
+  }
+  @keyframes scrollAnim {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,15,20,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 56px;
+    overflow-x: auto;
+  }
+  .nav-inner a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0 16px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .nav-inner a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  section:last-of-type { border-bottom: none; }
+
+  /* ── PROFILE CARD ── */
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(ellipse, rgba(110,231,183,0.1), transparent 70%);
+  }
+  .avatar-wrap {
+    flex-shrink: 0;
+  }
+  .avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--bg);
+    position: relative;
+  }
+  .avatar::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    opacity: 0.4;
+  }
+  .profile-info h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .profile-info .role {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .profile-info p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 460px;
+  }
+  .profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .tag {
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .tag-green { background: var(--tag-green); color: var(--accent); border: 1px solid rgba(110,231,183,0.2); }
+  .tag-blue  { background: var(--tag-blue); color: var(--accent2); border: 1px solid rgba(56,189,248,0.2); }
+  .tag-pink  { background: var(--tag-pink); color: var(--accent3); border: 1px solid rgba(244,114,182,0.2); }
+
+  /* ── SECTION HEADINGS ── */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  h2.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 48px;
+    max-width: 600px;
+  }
+
+  /* ── SOAL CARD ── */
+  .soal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .soal-card:hover { border-color: rgba(110,231,183,0.3); }
+
+  .soal-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .soal-num {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--bg);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .soal-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .soal-body { padding: 28px; }
+
+  .soal-question {
+    background: var(--code-bg);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .soal-question strong { color: var(--accent2); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .code-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    padding: 20px;
+    overflow-x: auto;
+    color: #a8d8a8;
+  }
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .nb { color: #f78c6c; }
+  .op { color: #89ddff; }
+  .at { color: var(--accent2); }
+
+  /* ── ANSWER BOX ── */
+  .answer-box {
+    background: rgba(110,231,183,0.04);
+    border: 1px solid rgba(110,231,183,0.15);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 20px;
+  }
+  .answer-box h4 {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .answer-box p {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* ── MOCK SCREENSHOT ── */
+  .mock-screen {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .mock-topbar {
+    background: #1e2433;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mock-url {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .mock-status {
+    background: rgba(40,200,64,0.15);
+    border: 1px solid rgba(40,200,64,0.3);
+    color: #28c840;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .mock-body {
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    color: #a8d8a8;
+  }
+
+  /* ── TABLE MOCK ── */
+  .table-mock {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .table-mock-header {
+    background: var(--surface2);
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 15px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-mock table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .table-mock th {
+    background: rgba(110,231,183,0.06);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-mock td {
+    padding: 12px 16px;
+    color: var(--text);
+    border-bottom: 1px solid rgba(37,42,58,0.6);
+  }
+  .table-mock tr:last-child td { border-bottom: none; }
+  .table-mock tr:hover td { background: rgba(110,231,183,0.03); }
+  .btn-edit {
+    background: rgba(56,189,248,0.15);
+    color: var(--accent2);
+    border: 1px solid rgba(56,189,248,0.2);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 6px;
+  }
+  .btn-del {
+    background: rgba(244,114,182,0.15);
+    color: var(--accent3);
+    border: 1px solid rgba(244,114,182,0.2);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .badge-p { background: rgba(244,114,182,0.15); color: var(--accent3); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .badge-l { background: rgba(56,189,248,0.15); color: var(--accent2); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+
+  /* ── FLOW STEPS ── */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .flow-steps::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--accent3));
+    opacity: 0.3;
+  }
+  .flow-step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 16px 0;
+  }
+  .step-dot {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .step-content { padding-top: 6px; }
+  .step-content strong { color: var(--text); font-size: 15px; display: block; margin-bottom: 4px; }
+  .step-content span { color: var(--muted); font-size: 14px; }
+
+  /* ── ERROR BOX ── */
+  .error-demo {
+    background: rgba(244,114,182,0.06);
+    border: 1px solid rgba(244,114,182,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent3);
+    margin: 16px 0;
+  }
+  .success-demo {
+    background: rgba(110,231,183,0.06);
+    border: 1px solid rgba(110,231,183,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    margin: 16px 0;
+  }
+
+  /* ── CONCLUSION ── */
+  .conclusion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 32px 0;
+  }
+  .concl-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .concl-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .concl-icon { font-size: 2rem; margin-bottom: 12px; }
+  .concl-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .concl-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 48px 24px;
+    text-align: center;
+  }
+  footer p { color: var(--muted); font-size: 14px; }
+  footer strong { color: var(--accent); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin: 32px 0;
+  }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .profile-card { flex-direction: column; text-align: center; }
+    .profile-tags { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<header>
+  <div class="header-eyebrow">
+    <span class="dot-live"></span>
+    Tutorial Blog · Pemrograman Web
+  </div>
+  <h1>Integrasi <span class="highlight">RESTful API</span><br>dengan JavaScript</h1>
+  <p class="header-sub">Panduan lengkap membangun aplikasi Manajemen Siswa menggunakan Laravel API, Fetch API, dan operasi CRUD penuh dari browser.</p>
+  <div class="header-meta">
+    <div class="meta-chip">
+      <span class="icon">👩‍💻</span>
+      <div><span>Penulis</span><strong>Gita Nopianti</strong></div>
+    </div>
+    <div class="meta-chip">
+      <span class="icon">🏫</span>
+      <div><span>Kelas</span><strong>XI RPL 1 · No. 10</strong></div>
+    </div>
+    <div class="meta-chip">
+      <span class="icon">📚</span>
+      <div><span>Mata Pelajaran</span><strong>Pemrograman Web</strong></div>
+    </div>
+    <div class="meta-chip">
+      <span class="icon">📅</span>
+      <div><span>Tahun</span><strong>2025 / 2026</strong></div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</header>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#profil">Profil</a>
+    <a href="#soal1">Soal 1</a>
+    <a href="#soal2">Soal 2</a>
+    <a href="#soal3">Soal 3</a>
+    <a href="#soal4">Soal 4</a>
+    <a href="#soal5">Soal 5</a>
+    <a href="#soal6">Soal 6</a>
+    <a href="#kesimpulan">Kesimpulan</a>
+  </div>
+</nav>
+
+<!-- ══ PROFIL ══ -->
+<section id="profil">
+  <div class="container">
+    <div class="section-label">Perkenalan</div>
+    <h2 class="section-title">Tentang Saya</h2>
+    <p class="section-desc">Sebelum masuk ke tutorial, izinkan saya memperkenalkan diri.</p>
+
+    <div class="profile-card">
+      <div class="avatar-wrap">
+        <div class="avatar">GN</div>
+      </div>
+      <div class="profile-info">
+        <h2>Gita Nopianti</h2>
+        <div class="role">Siswa SMK · Rekayasa Perangkat Lunak</div>
+        <p>Halo! Nama saya <strong>Gita Nopianti</strong>, siswa kelas XI RPL 1 dengan nomor absen 10. Saya sangat tertarik dengan dunia pengembangan web, khususnya bagaimana frontend dan backend bisa berkomunikasi melalui API. Artikel ini merupakan hasil praktik saya dalam mempelajari integrasi RESTful API menggunakan Laravel dan JavaScript.</p>
+        <div class="profile-tags">
+          <span class="tag tag-green">JavaScript</span>
+          <span class="tag tag-blue">Laravel</span>
+          <span class="tag tag-green">RESTful API</span>
+          <span class="tag tag-pink">HTML & CSS</span>
+          <span class="tag tag-blue">Postman</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOAL 1 ══ -->
+<section id="soal1">
+  <div class="container">
+    <div class="section-label">Bagian 01</div>
+    <h2 class="section-title">Pengujian API dengan Postman</h2>
+    <p class="section-desc">Memverifikasi bahwa server Laravel berjalan dan endpoint GET /api/siswa mengembalikan data JSON yang valid.</p>
+
+    <div class="soal-card">
+      <div class="soal-header">
+        <div class="soal-num">1</div>
+        <div class="soal-title">Bukti Respon JSON dari Postman & Penjelasan Status Code 200 OK</div>
+      </div>
+      <div class="soal-body">
+        <div class="soal-question">
+          <strong>Tugas:</strong> Pastikan server API Laravel sudah berjalan (Studi kasus: Manajemen Siswa). Gunakan Postman untuk memastikan endpoint <code>GET /api/siswa</code> mengembalikan data JSON yang valid. Lampirkan bukti respon JSON dan jelaskan fungsi status code 200 OK.
+        </div>
+
+        <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Berikut tampilan hasil pengujian endpoint di Postman:</p>
+
+        <!-- Simulasi tampilan Postman -->
+        <div class="mock-screen">
+          <div class="mock-topbar">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="mock-url">GET &nbsp; http://127.0.0.1:8000/api/siswa</div>
+            <div class="mock-status">200 OK · 311 ms</div>
+          </div>
+          <div class="mock-body">
+<span style="color:#89ddff;">[</span><br>
+&nbsp;&nbsp;<span style="color:#89ddff;">{</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"id"</span><span style="color:#89ddff;">:</span> <span style="color:var(--nb);">3</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"nis"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"234980"</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"nama_lengkap"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"RIZKYA RILLY"</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"jenis_kelamin"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"P"</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"golongan_darah"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"O"</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"updated_at"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"null"</span><br>
+&nbsp;&nbsp;<span style="color:#89ddff;">},</span><br>
+&nbsp;&nbsp;<span style="color:#89ddff;">{</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"id"</span><span style="color:#89ddff;">:</span> <span style="color:var(--nb);">4</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"nis"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"3456"</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"nama_lengkap"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"KARLINA AYU"</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"jenis_kelamin"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"P"</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"golongan_darah"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"A"</span><span style="color:#89ddff;">,</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">"updated_at"</span><span style="color:#89ddff;">:</span> <span style="color:#c3e88d;">"null"</span><br>
+&nbsp;&nbsp;<span style="color:#89ddff;">},</span><br>
+&nbsp;&nbsp;<span style="color:#546e7a;">// ... data lainnya ...</span><br>
+<span style="color:#89ddff;">]</span>
+          </div>
+        </div>
+
+        <div class="answer-box">
+          <h4>📌 Penjelasan Status Code 200 OK</h4>
+          <p>Status code <strong>200 OK</strong> adalah respon HTTP yang artinya request berhasil diproses oleh server. Ketika Postman menampilkan <strong>200 OK</strong> pada endpoint <code>GET /api/siswa</code>, itu berarti: (1) Server Laravel berhasil menerima request, (2) Controller berhasil mengambil data dari database, dan (3) Data berhasil dikembalikan dalam format JSON. Ini adalah status yang kita harapkan untuk setiap operasi GET yang sukses.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOAL 2 ══ -->
+<section id="soal2">
+  <div class="container">
+    <div class="section-label">Bagian 02</div>
+    <h2 class="section-title">Fetch Data dengan async/await</h2>
+    <p class="section-desc">Membuat skrip JavaScript untuk mengambil data dari API menggunakan pendekatan asynchronous.</p>
+
+    <div class="soal-card">
+      <div class="soal-header">
+        <div class="soal-num">2</div>
+        <div class="soal-title">Fungsi fetch() dengan async/await & Hasil console.log()</div>
+      </div>
+      <div class="soal-body">
+        <div class="soal-question">
+          <strong>Tugas:</strong> Buatlah skrip JavaScript untuk memanggil data dari API menggunakan <code>async/await</code> agar main thread tidak terhenti saat menunggu data dari server. Lampirkan potongan kode dan hasil <code>console.log()</code>.
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-lang">script.js</div>
+          </div>
+          <pre><span class="kw">const</span> API_URL <span class="op">=</span> <span class="str">"http://127.0.0.1:8000/api/siswa"</span>;
+
+<span class="cm">// Soal 1 & 2 — Fetch & Tampilkan Data</span>
+<span class="kw">async function</span> <span class="fn">fetchDataSiswa</span>() {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> response <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(API_URL);
+
+    <span class="cm">// Cek error status (404, 500, dll)</span>
+    <span class="kw">if</span> (<span class="op">!</span>response.ok) {
+      <span class="kw">throw new</span> Error(<span class="str">`Error <span class="op">${</span>response.status<span class="op">}</span>: <span class="op">${</span>response.statusText<span class="op">}</span>`</span>);
+    }
+
+    <span class="kw">const</span> data <span class="op">=</span> <span class="kw">await</span> response.<span class="fn">json</span>();
+    console.<span class="fn">log</span>(<span class="str">"Data siswa:"</span>, data); <span class="cm">// Soal 2 — bukti console.log</span>
+    <span class="fn">tampilkanData</span>(data);           <span class="cm">// Soal 3</span>
+  } <span class="kw">catch</span> (error) {
+    <span class="cm">// Error handling</span>
+    <span class="fn">tampilkanPesan</span>(<span class="str">"Gagal memuat data: "</span> <span class="op">+</span> error.message, <span class="str">"red"</span>);
+    console.<span class="fn">error</span>(<span class="str">"Error:"</span>, error);
+  }
+}</pre>
+        </div>
+
+        <!-- Console output mock -->
+        <div class="mock-screen">
+          <div class="mock-topbar">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="mock-url">Console · script.js:16</div>
+          </div>
+          <div class="mock-body" style="font-size:12px; line-height:1.8;">
+<span style="color:#7c8ba1;">▶</span> <span style="color:var(--text);">Data siswa:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--accent2);">Array(5)</span><br>
+&nbsp;&nbsp;<span style="color:#7c8ba1;">▶</span> <span style="color:var(--nb);">0</span>: {id: 3, nis: 2345, nama_lengkap: <span style="color:#c3e88d;">'RIZKYA RILLY'</span>, jenis_kelamin: <span style="color:#c3e88d;">'P'</span>}<br>
+&nbsp;&nbsp;<span style="color:#7c8ba1;">▶</span> <span style="color:var(--nb);">1</span>: {id: 4, nis: 3456, nama_lengkap: <span style="color:#c3e88d;">'KARLINA AYU'</span>, jenis_kelamin: <span style="color:#c3e88d;">'P'</span>}<br>
+&nbsp;&nbsp;<span style="color:#7c8ba1;">▶</span> <span style="color:var(--nb);">2</span>: {id: 7, nis: 4567, nama_lengkap: <span style="color:#c3e88d;">'PRYZHA AULIA'</span>, jenis_kelamin: <span style="color:#c3e88d;">'P'</span>}<br>
+&nbsp;&nbsp;<span style="color:#7c8ba1;">▶</span> <span style="color:var(--nb);">3</span>: {id: 8, nis: 5678, nama_lengkap: <span style="color:#c3e88d;">'RAISYA PRADITYA'</span>, jenis_kelamin: <span style="color:#c3e88d;">'L'</span>}<br>
+&nbsp;&nbsp;<span style="color:#7c8ba1;">▶</span> <span style="color:var(--nb);">4</span>: {id: 12, nis: 24256161, nama_lengkap: <span style="color:#c3e88d;">'AKMAL'</span>, jenis_kelamin: <span style="color:#c3e88d;">'L'</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;length: <span style="color:var(--nb);">5</span>
+          </div>
+        </div>
+
+        <div class="answer-box">
+          <h4>💡 Mengapa async/await?</h4>
+          <p>Proses pengambilan data dari server membutuhkan waktu. Tanpa <code>async/await</code>, JavaScript akan terus menjalankan baris berikutnya sebelum data datang, menyebabkan bug. Dengan <code>await</code>, program "menunggu" hingga data siap tanpa membekukan tampilan browser (main thread tetap responsif). Ini adalah cara modern menangani operasi asynchronous yang lebih bersih dibanding callback biasa.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOAL 3 ══ -->
+<section id="soal3">
+  <div class="container">
+    <div class="section-label">Bagian 03</div>
+    <h2 class="section-title">Menampilkan Data ke Tabel HTML</h2>
+    <p class="section-desc">Transformasi data JSON menjadi baris tabel secara dinamis menggunakan JavaScript DOM.</p>
+
+    <div class="soal-card">
+      <div class="soal-header">
+        <div class="soal-num">3</div>
+        <div class="soal-title">Render JSON ke Elemen &lt;tr&gt; Secara Dinamis</div>
+      </div>
+      <div class="soal-body">
+        <div class="soal-question">
+          <strong>Tugas:</strong> Transformasikan data JSON menjadi elemen baris tabel (<code>&lt;tr&gt;</code>) secara dinamis. Gunakan <code>document.createElement</code> atau <code>innerHTML</code> untuk memasukkan data Nama, NIS, dan Kelas.
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-lang">script.js — fungsi tampilkanData()</div>
+          </div>
+          <pre><span class="kw">function</span> <span class="fn">tampilkanData</span>(data) {
+  <span class="kw">const</span> tbody <span class="op">=</span> document.<span class="fn">querySelector</span>(<span class="str">"#tabel-siswa tbody"</span>);
+  tbody.innerHTML <span class="op">=</span> <span class="str">""</span>; <span class="cm">// Kosongkan dulu</span>
+
+  data.<span class="fn">forEach</span>((siswa, index) <span class="op">=></span> {
+    <span class="kw">const</span> row <span class="op">=</span> document.<span class="fn">createElement</span>(<span class="str">"tr"</span>);
+    row.innerHTML <span class="op">=</span> <span class="str">`
+      &lt;td&gt;<span class="op">${</span>index <span class="op">+</span> <span class="nb">1</span><span class="op">}</span>&lt;/td&gt;
+      &lt;td&gt;<span class="op">${</span>siswa.nis<span class="op">}</span>&lt;/td&gt;
+      &lt;td&gt;<span class="op">${</span>siswa.nama_lengkap<span class="op">}</span>&lt;/td&gt;
+      &lt;td&gt;<span class="op">${</span>siswa.jenis_kelamin<span class="op">}</span>&lt;/td&gt;
+      &lt;td&gt;<span class="op">${</span>siswa.golongan_darah<span class="op">}</span>&lt;/td&gt;
+      &lt;td&gt;
+        &lt;button onclick="editSiswa(<span class="op">${</span>siswa.id<span class="op">}</span>)"&gt;Edit&lt;/button&gt;
+        &lt;button onclick="hapusSiswa(<span class="op">${</span>siswa.id<span class="op">}</span>)"&gt;Hapus&lt;/button&gt;
+      &lt;/td&gt;
+    `</span>;
+    tbody.<span class="fn">appendChild</span>(row);
+  });
+}</pre>
+        </div>
+
+        <!-- Table mock -->
+        <div class="table-mock">
+          <div class="table-mock-header">📋 Manajemen Data Siswa</div>
+          <table>
+            <thead>
+              <tr>
+                <th>No</th><th>NIS</th><th>Nama Lengkap</th><th>Jenis Kelamin</th><th>Gol. Darah</th><th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>234980</td><td>RIZKYA RILLY</td><td><span class="badge-p">P</span></td><td>O</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>2</td><td>3456</td><td>KARLINA AYU</td><td><span class="badge-p">P</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>3</td><td>4567</td><td>PRYZHA AULIA</td><td><span class="badge-p">P</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>4</td><td>5678</td><td>RAISYA PRADITYA</td><td><span class="badge-l">L</span></td><td>B</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>5</td><td>24256161</td><td>AKMAL</td><td><span class="badge-l">L</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="answer-box">
+          <h4>✅ Hasil</h4>
+          <p>Data dari API berhasil ditampilkan secara dinamis ke dalam tabel HTML tanpa perlu me-refresh halaman. Setiap kali <code>fetchDataSiswa()</code> dipanggil, tabel otomatis diperbarui sesuai data terbaru dari database.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOAL 4 ══ -->
+<section id="soal4">
+  <div class="container">
+    <div class="section-label">Bagian 04</div>
+    <h2 class="section-title">Tambah Data dengan Metode POST</h2>
+    <p class="section-desc">Implementasi fitur tambah siswa baru dengan mengirim form HTML ke API menggunakan POST.</p>
+
+    <div class="soal-card">
+      <div class="soal-header">
+        <div class="soal-num">4</div>
+        <div class="soal-title">Logika Pengiriman Data POST & Bukti Data Berhasil Ditambahkan</div>
+      </div>
+      <div class="soal-body">
+        <div class="soal-question">
+          <strong>Tugas:</strong> Implementasikan fitur tambah data siswa. Kirimkan data dari form HTML ke API menggunakan metode POST. Jelaskan logika pengiriman data dan lampirkan bukti data baru muncul di tabel.
+        </div>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-dot">1</div>
+            <div class="step-content">
+              <strong>User mengisi form & klik Simpan</strong>
+              <span>Input berisi NIS, nama, jenis kelamin, dan golongan darah siswa baru.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-dot">2</div>
+            <div class="step-content">
+              <strong>JavaScript mengumpulkan data form</strong>
+              <span>Fungsi <code>simpanData()</code> membaca nilai dari setiap field input.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-dot">3</div>
+            <div class="step-content">
+              <strong>Kirim POST request ke API</strong>
+              <span>Data dikemas dalam <code>JSON.stringify()</code> dan dikirim ke <code>POST /api/siswa</code>.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-dot">4</div>
+            <div class="step-content">
+              <strong>Server menyimpan & merespons 201 Created</strong>
+              <span>Laravel memvalidasi, menyimpan ke database, dan mengembalikan data baru.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="step-dot">5</div>
+            <div class="step-content">
+              <strong>Tabel otomatis diperbarui</strong>
+              <span>Fungsi <code>fetchDataSiswa()</code> dipanggil ulang — data baru langsung muncul tanpa reload.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-lang">script.js — fungsi simpanData()</div>
+          </div>
+          <pre><span class="kw">async function</span> <span class="fn">simpanData</span>() {
+  <span class="kw">const</span> id <span class="op">=</span> document.<span class="fn">getElementById</span>(<span class="str">"input-id"</span>).value;
+  <span class="kw">const</span> payload <span class="op">=</span> {
+    nis:            document.<span class="fn">getElementById</span>(<span class="str">"input-nis"</span>).value,
+    nama_lengkap:   document.<span class="fn">getElementById</span>(<span class="str">"input-nama"</span>).value,
+    jenis_kelamin:  document.<span class="fn">getElementById</span>(<span class="str">"input-jk"</span>).value,
+    golongan_darah: document.<span class="fn">getElementById</span>(<span class="str">"input-gol"</span>).value,
+  };
+
+  <span class="kw">const</span> method <span class="op">=</span> id <span class="op">?</span> <span class="str">"PUT"</span> <span class="op">:</span> <span class="str">"POST"</span>;
+  <span class="kw">const</span> url    <span class="op">=</span> id <span class="op">?</span> <span class="str">`<span class="op">${</span>API_URL<span class="op">}</span>/<span class="op">${</span>id<span class="op">}</span>`</span> <span class="op">:</span> API_URL;
+
+  <span class="kw">const</span> response <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(url, {
+    method,
+    headers: { <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span> },
+    body: JSON.<span class="fn">stringify</span>(payload),
+  });
+
+  <span class="kw">if</span> (response.ok) {
+    <span class="fn">resetForm</span>();
+    <span class="fn">fetchDataSiswa</span>(); <span class="cm">// Refresh tabel</span>
+  }
+}</pre>
+        </div>
+
+        <!-- Table after POST -->
+        <p style="color:var(--accent); font-size:13px; font-weight:600; margin:16px 0 8px; letter-spacing:1px; text-transform:uppercase;">✅ Data berhasil ditambahkan:</p>
+        <div class="table-mock">
+          <table>
+            <thead><tr><th>No</th><th>NIS</th><th>Nama Lengkap</th><th>Jenis Kelamin</th><th>Gol. Darah</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>234980</td><td>RIZKYA RILLY</td><td><span class="badge-p">P</span></td><td>O</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>2</td><td>3456</td><td>KARLINA AYU</td><td><span class="badge-p">P</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>3</td><td>4567</td><td>PRYZHA AULIA</td><td><span class="badge-p">P</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>4</td><td>5678</td><td>RAISYA PRADITYA</td><td><span class="badge-l">L</span></td><td>B</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>5</td><td>24256161</td><td>AKMAL</td><td><span class="badge-l">L</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr style="background:rgba(110,231,183,0.05); border-left:3px solid var(--accent);">
+                <td>6</td><td>333333</td><td style="color:var(--accent); font-weight:600;">Gita ✨</td><td><span class="badge-p">P</span></td><td>B</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOAL 5 ══ -->
+<section id="soal5">
+  <div class="container">
+    <div class="section-label">Bagian 05</div>
+    <h2 class="section-title">Edit & Hapus Data (PUT & DELETE)</h2>
+    <p class="section-desc">Implementasi fitur edit dengan metode PUT dan hapus data dengan metode DELETE.</p>
+
+    <div class="soal-card">
+      <div class="soal-header">
+        <div class="soal-num">5</div>
+        <div class="soal-title">Logika PUT untuk Edit & DELETE untuk Hapus Data</div>
+      </div>
+      <div class="soal-body">
+        <div class="soal-question">
+          <strong>Tugas:</strong> Implementasikan fitur edit dan delete data siswa pada setiap baris. Komunikasi HTML ke API menggunakan metode PUT dan DELETE. Jelaskan logika pengiriman data dan lampirkan buktinya.
+        </div>
+
+        <!-- Edit -->
+        <h3 style="color:var(--accent2); font-size:1rem; font-weight:700; margin:20px 0 12px; text-transform:uppercase; letter-spacing:1px;">✏️ Edit (PUT)</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-lang">script.js — fungsi editSiswa()</div>
+          </div>
+          <pre><span class="kw">async function</span> <span class="fn">editSiswa</span>(id) {
+  <span class="cm">// Ambil data siswa berdasarkan ID</span>
+  <span class="kw">const</span> res  <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`<span class="op">${</span>API_URL<span class="op">}</span>/<span class="op">${</span>id<span class="op">}</span>`</span>);
+  <span class="kw">const</span> data <span class="op">=</span> <span class="kw">await</span> res.<span class="fn">json</span>();
+
+  <span class="cm">// Isi form secara otomatis</span>
+  document.<span class="fn">getElementById</span>(<span class="str">"input-id"</span>).value   <span class="op">=</span> data.id;
+  document.<span class="fn">getElementById</span>(<span class="str">"input-nis"</span>).value  <span class="op">=</span> data.nis;
+  document.<span class="fn">getElementById</span>(<span class="str">"input-nama"</span>).value <span class="op">=</span> data.nama_lengkap;
+  document.<span class="fn">getElementById</span>(<span class="str">"input-jk"</span>).value   <span class="op">=</span> data.jenis_kelamin;
+  document.<span class="fn">getElementById</span>(<span class="str">"input-gol"</span>).value  <span class="op">=</span> data.golongan_darah;
+  <span class="cm">// simpanData() akan otomatis pakai PUT karena id tidak kosong</span>
+}</pre>
+        </div>
+
+        <!-- Delete -->
+        <h3 style="color:var(--accent3); font-size:1rem; font-weight:700; margin:20px 0 12px; text-transform:uppercase; letter-spacing:1px;">🗑️ Delete (DELETE)</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-lang">script.js — fungsi hapusSiswa()</div>
+          </div>
+          <pre><span class="kw">async function</span> <span class="fn">hapusSiswa</span>(id) {
+  <span class="cm">// Konfirmasi sebelum hapus</span>
+  <span class="kw">if</span> (<span class="op">!</span><span class="fn">confirm</span>(<span class="str">"Yakin ingin menghapus data ini?"</span>)) <span class="kw">return</span>;
+
+  <span class="kw">const</span> response <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`<span class="op">${</span>API_URL<span class="op">}</span>/<span class="op">${</span>id<span class="op">}</span>`</span>, {
+    method: <span class="str">"DELETE"</span>,
+  });
+
+  <span class="kw">if</span> (response.ok) {
+    <span class="fn">fetchDataSiswa</span>(); <span class="cm">// Refresh tabel tanpa reload halaman</span>
+  }
+}</pre>
+        </div>
+
+        <!-- After edit mock -->
+        <p style="color:var(--accent2); font-size:13px; font-weight:600; margin:16px 0 8px; letter-spacing:1px; text-transform:uppercase;">✅ Setelah edit & hapus — tabel terupdate otomatis:</p>
+        <div class="table-mock">
+          <table>
+            <thead><tr><th>No</th><th>NIS</th><th>Nama Lengkap</th><th>Jenis Kelamin</th><th>Gol. Darah</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td style="color:var(--accent2);">22222222</td><td>RIZKYA RILLY</td><td><span class="badge-p">P</span></td><td>O</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>2</td><td>3456</td><td>KARLINA AYU</td><td><span class="badge-p">P</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>3</td><td>4567</td><td>PRYZHA AULIA</td><td><span class="badge-p">P</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>4</td><td>5678</td><td>RAISYA PRADITYA</td><td><span class="badge-l">L</span></td><td>B</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>5</td><td>24256161</td><td>AKMAL</td><td><span class="badge-l">L</span></td><td>A</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+              <tr><td>6</td><td>333333</td><td>Gita</td><td><span class="badge-p">P</span></td><td>B</td><td><button class="btn-edit">Edit</button><button class="btn-del">Hapus</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="answer-box">
+          <h4>📌 Ringkasan Logika</h4>
+          <p>Fungsi <code>simpanData()</code> digunakan untuk dua keperluan: jika field id terisi → kirim <strong>PUT</strong> (update), jika kosong → kirim <strong>POST</strong> (tambah baru). Sementara fungsi <code>hapusSiswa(id)</code> mengirim request <strong>DELETE</strong> ke endpoint dengan id spesifik. Setelah setiap operasi berhasil, tabel direfresh otomatis dengan memanggil ulang <code>fetchDataSiswa()</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOAL 6 ══ -->
+<section id="soal6">
+  <div class="container">
+    <div class="section-label">Bagian 06</div>
+    <h2 class="section-title">Error Handling dengan try...catch</h2>
+    <p class="section-desc">Menambahkan penanganan error agar aplikasi tetap informatif saat API tidak tersedia.</p>
+
+    <div class="soal-card">
+      <div class="soal-header">
+        <div class="soal-num">6</div>
+        <div class="soal-title">Kode try...catch & Pentingnya bagi User Experience</div>
+      </div>
+      <div class="soal-body">
+        <div class="soal-question">
+          <strong>Tugas:</strong> Tambahkan logika <code>try...catch</code> untuk menangani kondisi jika API tidak ditemukan (404) atau server bermasalah (500). Jelaskan mengapa hal ini penting bagi User Experience.
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-lang">script.js — error handling</div>
+          </div>
+          <pre><span class="kw">try</span> {
+  <span class="kw">const</span> response <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(API_URL);
+
+  <span class="cm">// Cek error status (404, 500, dll)</span>
+  <span class="kw">if</span> (<span class="op">!</span>response.ok) {
+    <span class="kw">throw new</span> Error(
+      <span class="str">`Error <span class="op">${</span>response.status<span class="op">}</span>: <span class="op">${</span>response.statusText<span class="op">}</span>`</span>
+    );
+  }
+
+  <span class="kw">const</span> data <span class="op">=</span> <span class="kw">await</span> response.<span class="fn">json</span>();
+  <span class="fn">tampilkanData</span>(data);
+
+} <span class="kw">catch</span> (error) {
+  <span class="cm">// Jika API tidak ditemukan atau server error</span>
+  <span class="fn">tampilkanPesan</span>(<span class="str">"Gagal memuat data: "</span> <span class="op">+</span> error.message, <span class="str">"red"</span>);
+  console.<span class="fn">error</span>(<span class="str">"Error:"</span>, error);
+}</pre>
+        </div>
+
+        <div style="margin: 16px 0;">
+          <p style="color:var(--muted); font-size:14px; margin-bottom:8px;">Ketika terjadi error, pengguna melihat pesan yang jelas:</p>
+          <div class="error-demo">
+            ❌ &nbsp;Gagal memuat data: Error 404: Not Found
+          </div>
+          <div class="error-demo" style="background:rgba(248,113,113,0.06); border-color:rgba(248,113,113,0.2); color:#f87171;">
+            ❌ &nbsp;Gagal memuat data: Error 500: Internal Server Error
+          </div>
+          <p style="color:var(--muted); font-size:14px; margin:8px 0;">Dibandingkan ketika sukses:</p>
+          <div class="success-demo">
+            ✅ &nbsp;Data berhasil dimuat! Menampilkan 5 siswa.
+          </div>
+        </div>
+
+        <div class="answer-box">
+          <h4>🎯 Mengapa Penting bagi User Experience?</h4>
+          <p>Tanpa <code>try...catch</code>, ketika API gagal, pengguna akan melihat halaman kosong atau tabel yang tidak berisi data — tanpa tahu apa yang terjadi. Dengan error handling yang baik: (1) Pengguna mendapat informasi jelas bahwa ada masalah, (2) Aplikasi tidak crash total, (3) Developer bisa membaca detail error di console untuk debugging, dan (4) Pesan berwarna merah secara visual langsung menarik perhatian ke masalah yang terjadi.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ KESIMPULAN ══ -->
+<section id="kesimpulan">
+  <div class="container">
+    <div class="section-label">Penutup</div>
+    <h2 class="section-title">Kesimpulan</h2>
+    <p class="section-desc">Rangkuman dari seluruh materi yang telah dipelajari dalam praktik integrasi RESTful API ini.</p>
+
+    <div class="conclusion-grid">
+      <div class="concl-card">
+        <div class="concl-icon">🔌</div>
+        <h4>RESTful API</h4>
+        <p>API adalah jembatan antara frontend dan backend. Dengan endpoint yang jelas, data bisa dikonsumsi oleh siapa saja.</p>
+      </div>
+      <div class="concl-card">
+        <div class="concl-icon">⚡</div>
+        <h4>async/await</h4>
+        <p>Pendekatan modern untuk menangani operasi asynchronous yang membuat kode lebih bersih dan mudah dibaca.</p>
+      </div>
+      <div class="concl-card">
+        <div class="concl-icon">📋</div>
+        <h4>CRUD Lengkap</h4>
+        <p>GET, POST, PUT, DELETE — empat operasi dasar yang memungkinkan manajemen data penuh dari browser.</p>
+      </div>
+      <div class="concl-card">
+        <div class="concl-icon">🛡️</div>
+        <h4>Error Handling</h4>
+        <p>try...catch memastikan aplikasi tetap informatif dan tidak crash ketika API bermasalah.</p>
+      </div>
+      <div class="concl-card">
+        <div class="concl-icon">🎯</div>
+        <h4>DOM Dinamis</h4>
+        <p>JavaScript memanipulasi HTML secara dinamis — data dari API langsung tampil tanpa reload halaman.</p>
+      </div>
+      <div class="concl-card">
+        <div class="concl-icon">💡</div>
+        <h4>UX yang Baik</h4>
+        <p>Feedback yang jelas kepada pengguna — baik saat sukses maupun gagal — adalah kunci pengalaman yang menyenangkan.</p>
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; margin-top:16px; text-align:center;">
+      <p style="color:var(--muted); font-size:15px; line-height:1.8; max-width:600px; margin:0 auto;">
+        Melalui praktik ini, saya memahami bagaimana <strong style="color:var(--text);">frontend dan backend berkomunikasi</strong> melalui API. Konsep <code>fetch</code>, <code>async/await</code>, dan penanganan error adalah fondasi penting dalam pengembangan web modern. Terima kasih telah membaca! 🙏
+      </p>
+      <div style="margin-top:24px;">
+        <span class="tag tag-green" style="font-size:14px; padding:8px 20px;">Gita Nopianti · XI RPL 1 · No. 10</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <p>Dibuat dengan ❤️ oleh <strong>Gita Nopianti</strong> &nbsp;·&nbsp; Kelas XI RPL 1 &nbsp;·&nbsp; SMK Bandung</p>
+  <p style="margin-top:8px; font-size:12px;">Mata Pelajaran: Pemrograman Web · Materi: Integrasi RESTful API</p>
+</footer>
+
+</body>
+</html>

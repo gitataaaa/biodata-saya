@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil — Gita Nopianti</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  html { scroll-behavior: smooth; }
+
+  :root {
+    --pink-50: #fff0f5;
+    --pink-100: #ffe0ec;
+    --pink-200: #ffc2d4;
+    --pink-300: #ff9eb5;
+    --pink-400: #ff7096;
+    --pink-500: #ff4d7b;
+    --pink-600: #e8305e;
+    --rose: #f9a8c9;
+    --blush: #fde8f0;
+    --cream: #fff8fb;
+    --mauve: #c9748a;
+    --text-dark: #3d1a26;
+    --text-mid: #7a4458;
+    --text-light: #b08090;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 15%, #ffd6e7 0%, transparent 45%),
+      radial-gradient(circle at 85% 85%, #ffc2d4 0%, transparent 45%),
+      radial-gradient(circle at 50% 50%, #fff0f5 0%, transparent 60%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* ── Floating petals ── */
+  .petal {
+    position: fixed;
+    border-radius: 50% 0 50% 0;
+    background: var(--pink-200);
+    opacity: 0.3;
+    animation: floatPetal linear infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+  @keyframes floatPetal {
+    0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.3; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-top {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pink-300), var(--pink-500), var(--pink-300));
+    z-index: 999;
+    transition: width 0.1s;
+    pointer-events: none;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 3px;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 20px;
+    background: rgba(255, 248, 251, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--pink-100);
+  }
+  nav a {
+    text-decoration: none;
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1.5px solid var(--pink-200);
+    color: var(--mauve);
+    background: white;
+    transition: all 0.25s;
+    cursor: pointer;
+    display: inline-block;
+    z-index: 101;
+  }
+  nav a:hover, nav a.active {
+    background: var(--pink-400);
+    color: white;
+    border-color: var(--pink-400);
+    box-shadow: 0 4px 12px rgba(255,77,123,0.3);
+  }
+
+  /* ── HERO SECTION ── */
+  .hero {
+    position: relative;
+    padding: 70px 20px 50px;
+    text-align: center;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  /* Decorative rings behind avatar */
+  .avatar-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+  .avatar-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -14px;
+    border-radius: 50%;
+    border: 2px dashed var(--pink-300);
+    animation: spinSlow 20s linear infinite;
+  }
+  .avatar-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--pink-200);
+    animation: spinSlow 30s linear infinite reverse;
+  }
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink-200), var(--pink-400));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    box-shadow:
+      0 0 0 6px white,
+      0 8px 40px rgba(255,77,123,0.25);
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.8s ease both;
+    overflow: hidden;
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .hero-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    color: var(--text-dark);
+    line-height: 1.1;
+    animation: fadeUp 0.8s 0.15s ease both;
+  }
+  .hero-name span {
+    color: var(--pink-500);
+    font-style: italic;
+  }
+
+  .hero-subtitle {
+    margin-top: 10px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.2rem;
+    color: var(--mauve);
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 8px 22px;
+    background: white;
+    border: 1.5px solid var(--pink-200);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    color: var(--mauve);
+    animation: fadeUp 0.8s 0.45s ease both;
+    box-shadow: 0 4px 15px rgba(255,77,123,0.1);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pink-400); display: inline-block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 10px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── BIODATA CARD ── */
+  .bio-card {
+    background: white;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(255,77,123,0.09);
+    border: 1px solid var(--pink-100);
+    margin-bottom: 24px;
+    animation: cardReveal 0.7s 0.2s ease both;
+  }
+  @keyframes cardReveal {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .bio-card-header {
+    background: linear-gradient(135deg, var(--pink-300), var(--pink-500));
+    padding: 22px 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .bio-card-header h2 {
+    font-family: 'Playfair Display', serif;
+    color: white;
+    font-size: 1.2rem;
+  }
+  .bio-card-header .icon {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .bio-grid {
+    padding: 28px 30px;
+    display: grid;
+    gap: 0;
+  }
+
+  .bio-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--pink-50);
+    align-items: center;
+    transition: background 0.2s;
+  }
+  .bio-row:last-child { border-bottom: none; }
+  .bio-row:hover { background: var(--pink-50); margin: 0 -30px; padding: 14px 30px; border-radius: 12px; }
+
+  .bio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .bio-label .licon {
+    width: 28px; height: 28px;
+    background: var(--pink-50);
+    border: 1px solid var(--pink-100);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .bio-value {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  .bio-value strong {
+    color: var(--mauve);
+    font-weight: 600;
+  }
+
+  @media(max-width: 500px) {
+    .bio-row { grid-template-columns: 1fr; gap: 4px; }
+    .bio-value { padding-left: 38px; }
+  }
+
+  /* ── QUOTE CARD ── */
+  .quote-card {
+    background: linear-gradient(135deg, var(--pink-400), var(--pink-600));
+    border-radius: 24px;
+    padding: 36px 32px;
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    animation: cardReveal 0.7s 0.4s ease both;
+    box-shadow: 0 10px 40px rgba(255,77,123,0.3);
+  }
+  .quote-card::before {
+    content: '❝';
+    position: absolute;
+    top: -10px; left: 20px;
+    font-size: 6rem;
+    color: rgba(255,255,255,0.15);
+    font-family: 'Playfair Display', serif;
+    line-height: 1;
+  }
+  .quote-card p {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: white;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+  }
+  .quote-card .quote-author {
+    margin-top: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.75);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── BACK BUTTON ── */
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: white;
+    border: 1.5px solid var(--pink-200);
+    color: var(--mauve);
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.25s;
+    margin-bottom: 30px;
+    display: inline-flex;
+  }
+  .back-btn:hover {
+    background: var(--pink-400);
+    color: white;
+    border-color: var(--pink-400);
+    box-shadow: 0 4px 14px rgba(255,77,123,0.3);
+    transform: translateX(-3px);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 30px 20px 50px;
+    color: var(--text-light);
+    font-size: 0.78rem;
+    position: relative;
+    z-index: 1;
+  }
+  footer .heart { color: var(--pink-400); }
+  footer .logo {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.5rem;
+    color: var(--mauve);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* ── BACK TO TOP ── */
+  #btt {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--pink-400);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,77,123,0.4);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    z-index: 999;
+  }
+  #btt.show { opacity: 1; transform: translateY(0); }
+
+  /* ── HOBI CARD ── */
+  .hobi-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(255,77,123,0.09);
+    border: 1px solid var(--pink-100);
+    margin-bottom: 24px;
+    animation: cardReveal 0.7s 0.35s ease both;
+  }
+  .hobi-inner {
+    padding: 28px 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .hobi-icon {
+    width: 70px; height: 70px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--pink-200), var(--pink-400));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(255,77,123,0.25);
+  }
+  .hobi-text h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+  }
+  .hobi-text p {
+    font-size: 0.85rem;
+    color: var(--text-mid);
+    line-height: 1.55;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-top" id="progress"></div>
+
+<!-- Floating Petals -->
+<div class="petal" style="left:5%;width:14px;height:14px;animation-duration:12s;animation-delay:0s;"></div>
+<div class="petal" style="left:20%;width:10px;height:10px;animation-duration:9s;animation-delay:2s;"></div>
+<div class="petal" style="left:45%;width:8px;height:8px;animation-duration:14s;animation-delay:5s;"></div>
+<div class="petal" style="left:70%;width:13px;height:13px;animation-duration:11s;animation-delay:1s;"></div>
+<div class="petal" style="left:88%;width:10px;height:10px;animation-duration:13s;animation-delay:3s;"></div>
+
+<!-- Nav -->
+<nav>
+  <a href="blog_lkpd_gita.html">🌸 Laravel Journey</a>
+  <a href="profil.html" class="active">✿ Profil Saya</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="avatar-wrap">
+    <div class="avatar">🌸</div>
+  </div>
+  <h1 class="hero-name">Gita <span>Nopianti</span></h1>
+  <p class="hero-subtitle">✿ Siswi Berprestasi · XI RPL 1 ✿</p>
+  <div class="hero-badge">
+    <span class="dot"></span>
+    SMK Negeri 4 Bandung &nbsp;·&nbsp; Rekayasa Perangkat Lunak
+    <span class="dot"></span>
+  </div>
+</section>
+
+<main>
+
+  <a href="blog_lkpd_gita.html" class="back-btn">← Kembali ke Laravel Journey</a>
+
+  <!-- Biodata Card -->
+  <div class="bio-card">
+    <div class="bio-card-header">
+      <div class="icon">📋</div>
+      <h2>Biodata Diri</h2>
+    </div>
+    <div class="bio-grid">
+      <div class="bio-row">
+        <div class="bio-label">
+          <span class="licon">👤</span>
+          Nama Lengkap
+        </div>
+        <div class="bio-value"><strong>Gita Nopianti</strong></div>
+      </div>
+      <div class="bio-row">
+        <div class="bio-label">
+          <span class="licon">🏫</span>
+          Kelas
+        </div>
+        <div class="bio-value">XI RPL 1 — Rekayasa Perangkat Lunak</div>
+      </div>
+      <div class="bio-row">
+        <div class="bio-label">
+          <span class="licon">🎂</span>
+          Tanggal Lahir
+        </div>
+        <div class="bio-value">Bandung, 21 November 2008</div>
+      </div>
+      <div class="bio-row">
+        <div class="bio-label">
+          <span class="licon">📍</span>
+          Alamat
+        </div>
+        <div class="bio-value">Jalan Haji Basuki No. 03, Bandung</div>
+      </div>
+      <div class="bio-row">
+        <div class="bio-label">
+          <span class="licon">📚</span>
+          Hobi
+        </div>
+        <div class="bio-value">Membaca</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hobi Card -->
+  <div class="hobi-card">
+    <div class="hobi-inner">
+      <div class="hobi-icon">📖</div>
+      <div class="hobi-text">
+        <h3>Suka Membaca</h3>
+        <p>Membaca adalah jendela dunia. Dengan membaca, Gita terus memperluas wawasan dan pengetahuan — dari buku pelajaran hingga cerita-cerita yang menginspirasi.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote Card -->
+  <div class="quote-card">
+    <p>Ilmu adalah cahaya yang menerangi jalan, dan setiap buku yang dibaca adalah langkah menuju versi diri yang lebih baik.</p>
+    <div class="quote-author">— Gita Nopianti, XI RPL 1</div>
+  </div>
+
+</main>
+
+<footer>
+  <span class="logo">Gita Nopianti</span>
+  XI RPL 1 &nbsp;·&nbsp; SMK Negeri 4 Bandung<br>
+  <br>Dibuat dengan <span class="heart">♥</span> dan semangat belajar
+</footer>
+
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  const prog = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    prog.style.width = pct + '%';
+    document.getElementById('btt').classList.toggle('show', window.scrollY > 200);
+  });
+</script>
+</body>
+</html>

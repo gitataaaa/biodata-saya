@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog LKPD Gita Nopianti — Laravel Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink-50: #fff0f5;
+    --pink-100: #ffe0ec;
+    --pink-200: #ffc2d4;
+    --pink-300: #ff9eb5;
+    --pink-400: #ff7096;
+    --pink-500: #ff4d7b;
+    --pink-600: #e8305e;
+    --rose: #f9a8c9;
+    --blush: #fde8f0;
+    --cream: #fff8fb;
+    --mauve: #c9748a;
+    --text-dark: #3d1a26;
+    --text-mid: #7a4458;
+    --text-light: #b08090;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background pattern ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, #ffd6e7 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, #ffc2d4 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, #fff0f5 0%, transparent 60%);
+    z-index: -1;
+  }
+
+  /* ── Floating petals ── */
+  .petal {
+    position: fixed;
+    width: 12px; height: 12px;
+    border-radius: 50% 0 50% 0;
+    background: var(--pink-200);
+    opacity: 0.35;
+    animation: floatPetal linear infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+  @keyframes floatPetal {
+    0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.35; }
+    90%  { opacity: 0.35; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    text-align: center;
+    padding: 80px 20px 60px;
+    overflow: hidden;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--pink-400), transparent);
+    border-radius: 2px;
+  }
+  .header-tag {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.1rem;
+    color: var(--mauve);
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    animation: fadeUp 0.8s ease both;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    color: var(--text-dark);
+    line-height: 1.15;
+    animation: fadeUp 0.8s 0.15s ease both;
+  }
+  header h1 em {
+    color: var(--pink-500);
+    font-style: italic;
+  }
+  .header-sub {
+    margin-top: 18px;
+    font-size: 1rem;
+    color: var(--text-mid);
+    font-weight: 300;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding: 8px 20px;
+    background: white;
+    border: 1.5px solid var(--pink-200);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--mauve);
+    animation: fadeUp 0.8s 0.45s ease both;
+    box-shadow: 0 4px 15px rgba(255,77,123,0.1);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pink-400); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── NAV PILLS ── */
+  nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 30px 20px 20px;
+  }
+  nav a {
+    text-decoration: none;
+    padding: 8px 20px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1.5px solid var(--pink-200);
+    color: var(--mauve);
+    background: white;
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+  nav a:hover, nav a.active {
+    background: var(--pink-400);
+    color: white;
+    border-color: var(--pink-400);
+    box-shadow: 0 4px 12px rgba(255,77,123,0.3);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 20px 80px;
+  }
+
+  /* ── SESSION CARD ── */
+  .session-card {
+    background: white;
+    border-radius: 24px;
+    margin-bottom: 40px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(255,77,123,0.08);
+    border: 1px solid var(--pink-100);
+    animation: cardReveal 0.6s ease both;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .session-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 50px rgba(255,77,123,0.14);
+  }
+  @keyframes cardReveal {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    padding: 28px 32px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    border-bottom: 1px solid var(--pink-100);
+  }
+  .session-num {
+    min-width: 54px; height: 54px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--pink-300), var(--pink-500));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(255,77,123,0.35);
+  }
+  .card-title-wrap h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--text-dark);
+    line-height: 1.3;
+  }
+  .card-title-wrap p {
+    margin-top: 5px;
+    font-size: 0.82rem;
+    color: var(--text-light);
+    font-weight: 400;
+  }
+  .card-body { padding: 24px 32px 28px; }
+
+  /* ── STUDY CASE BLOCK ── */
+  .studi-kasus {
+    background: var(--blush);
+    border-left: 4px solid var(--pink-400);
+    border-radius: 0 12px 12px 0;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+  .studi-kasus strong { color: var(--mauve); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 4px; }
+
+  /* ── CODE BLOCK ── */
+  .code-wrap {
+    position: relative;
+    margin: 16px 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--pink-100);
+  }
+  .code-label {
+    background: var(--pink-50);
+    padding: 8px 16px;
+    font-size: 0.73rem;
+    color: var(--mauve);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--pink-100);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .code-label::before { content:''; width:8px;height:8px;border-radius:50%;background:var(--pink-300); }
+  pre {
+    background: #2d1b22;
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    font-family: 'Courier New', monospace;
+  }
+  pre code { color: #f9d5e3; }
+  .kw  { color: #ff9eb5; }
+  .fn  { color: #ffc2d4; }
+  .str { color: #a8e6cf; }
+  .cm  { color: #7a556a; font-style: italic; }
+  .cl  { color: #ffd6e7; }
+
+  /* ── EXPLANATION BOX ── */
+  .explain-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 18px 0;
+  }
+  .explain-item {
+    background: var(--pink-50);
+    border: 1px solid var(--pink-100);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .explain-item h4 {
+    font-size: 0.82rem;
+    color: var(--pink-600);
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .explain-item h4::before { content:'♦'; font-size:0.65rem; }
+  .explain-item p { font-size: 0.8rem; color: var(--text-mid); line-height: 1.55; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0; border-radius: 14px; border: 1px solid var(--pink-100); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead tr { background: linear-gradient(90deg, var(--pink-300), var(--pink-400)); }
+  thead th { color: white; padding: 11px 16px; text-align: left; font-weight: 500; font-size: 0.78rem; }
+  tbody tr:nth-child(even) { background: var(--pink-50); }
+  tbody td { padding: 10px 16px; color: var(--text-mid); border-bottom: 1px solid var(--pink-100); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* ── SCREENSHOT PLACEHOLDER ── */
+  .screenshot {
+    background: linear-gradient(135deg, var(--pink-50), white);
+    border: 2px dashed var(--pink-200);
+    border-radius: 16px;
+    padding: 30px;
+    margin: 16px 0;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-light);
+  }
+  .screenshot .icon { font-size: 2rem; margin-bottom: 8px; }
+
+  /* ── ANSWER BOX ── */
+  .answer-box {
+    background: linear-gradient(135deg, #fff0f5, #fff8fb);
+    border: 1.5px solid var(--pink-200);
+    border-radius: 16px;
+    padding: 20px 22px;
+    margin: 16px 0;
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+    position: relative;
+  }
+  .answer-box::before {
+    content: '✦';
+    position: absolute;
+    top: -12px; left: 20px;
+    background: white;
+    padding: 0 8px;
+    color: var(--pink-400);
+    font-size: 1rem;
+  }
+
+  /* ── COMPARISON GRID ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  @media(max-width: 560px){ .compare-grid { grid-template-columns: 1fr; } }
+  .compare-card {
+    border-radius: 14px;
+    padding: 18px;
+    border: 1.5px solid var(--pink-200);
+    background: white;
+  }
+  .compare-card h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--mauve);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--pink-100);
+  }
+  .compare-card ul { list-style: none; }
+  .compare-card li {
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    padding: 4px 0;
+    display: flex;
+    gap: 8px;
+  }
+  .compare-card li::before { content:'→'; color: var(--pink-400); flex-shrink: 0; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pink-500);
+    margin: 22px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after { content:''; flex: 1; height: 1px; background: var(--pink-100); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 40px 20px 50px;
+    color: var(--text-light);
+    font-size: 0.78rem;
+  }
+  footer .heart { color: var(--pink-400); }
+  footer .logo {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.6rem;
+    color: var(--mauve);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  /* ── PROGRESS BAR TOP ── */
+  .progress-top {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pink-300), var(--pink-500), var(--pink-300));
+    z-index: 999;
+    transition: width 0.1s;
+  }
+
+  /* ── BACK TO TOP ── */
+  #btt {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--pink-400);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,77,123,0.4);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    z-index: 999;
+  }
+  #btt.show { opacity: 1; transform: translateY(0); }
+
+  /* ── TAG CHIP ── */
+  .tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0; }
+  .tag {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--pink-50);
+    border: 1px solid var(--pink-200);
+    font-size: 0.73rem;
+    color: var(--mauve);
+    font-weight: 500;
+  }
+
+  /* ── QUOTE ── */
+  .quote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--mauve);
+    text-align: center;
+    padding: 24px 32px;
+    position: relative;
+    margin: 20px 0;
+  }
+  .quote::before, .quote::after {
+    content: '"';
+    font-size: 3rem;
+    color: var(--pink-200);
+    line-height: 0;
+    vertical-align: -0.4em;
+  }
+
+  /* responsive */
+  @media(max-width:600px){
+    .card-header { flex-direction: column; gap: 12px; }
+    .card-body, .card-header { padding: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-top" id="progress"></div>
+
+<!-- Floating Petals -->
+<div class="petal" style="left:8%;animation-duration:12s;animation-delay:0s;width:14px;height:14px;"></div>
+<div class="petal" style="left:22%;animation-duration:9s;animation-delay:2s;"></div>
+<div class="petal" style="left:40%;animation-duration:14s;animation-delay:4s;width:9px;height:9px;"></div>
+<div class="petal" style="left:65%;animation-duration:11s;animation-delay:1s;width:16px;height:16px;"></div>
+<div class="petal" style="left:80%;animation-duration:10s;animation-delay:3s;"></div>
+<div class="petal" style="left:92%;animation-duration:13s;animation-delay:6s;width:10px;height:10px;"></div>
+
+<!-- Header -->
+<header>
+  <div class="header-tag">✿ Lembar Kerja Peserta Didik ✿</div>
+  <h1>Laravel <em>Journey</em></h1>
+  <p class="header-sub">Gita Nopianti &nbsp;·&nbsp; XI RPL 1 &nbsp;·&nbsp; Sesi 22–27</p>
+  <div class="header-badge">
+    <span class="dot"></span>
+    Pemrograman Web &nbsp;·&nbsp; Framework Laravel
+    <span class="dot"></span>
+  </div>
+</header>
+
+<!-- Nav -->
+<nav>
+  <a href="#s22" class="active">Sesi 22</a>
+  <a href="#s23">Sesi 23</a>
+  <a href="#s24">Sesi 24</a>
+  <a href="#s25">Sesi 25</a>
+  <a href="#s26">Sesi 26</a>
+  <a href="#s27">Sesi 27</a>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════════════
+     SESI 22 — Laravel & MVC
+══════════════════════════════════════ -->
+<div class="session-card" id="s22" style="animation-delay:0.1s">
+  <div class="card-header">
+    <div class="session-num">22</div>
+    <div class="card-title-wrap">
+      <h2>Framework Laravel &amp; Konsep MVC</h2>
+      <p>Pengenalan framework, routing, dan views pertama</p>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="tags">
+      <span class="tag">Framework</span>
+      <span class="tag">MVC</span>
+      <span class="tag">Route</span>
+      <span class="tag">View Blade</span>
+    </div>
+
+    <div class="explain-box">
+      <div class="explain-item">
+        <h4>Framework</h4>
+        <p>Kerangka kerja (software) untuk memudahkan programmer membuat aplikasi/web yang terstruktur, berisi fungsi, plugin, dan konsep tertentu.</p>
+      </div>
+      <div class="explain-item">
+        <h4>Konsep MVC</h4>
+        <p>Model-View-Controller — metode membangun aplikasi dengan memisahkan data (Model), tampilan (View), dan cara memprosesnya (Controller).</p>
+      </div>
+    </div>
+
+    <div class="section-label">3 Route GET</div>
+    <div class="code-wrap">
+      <div class="code-label">routes/web.php</div>
+      <pre><code><span class="cm">// Route About</span>
+<span class="cl">Route</span>::<span class="fn">get</span>(<span class="str">'/About'</span>, <span class="kw">function</span> () {
+    <span class="kw">return</span> <span class="str">"Ini menjelaskan tentang saya"</span>;
+});
+
+<span class="cm">// Route Kelas</span>
+<span class="cl">Route</span>::<span class="fn">get</span>(<span class="str">'/Kelas'</span>, <span class="kw">function</span> () {
+    <span class="kw">return</span> <span class="str">"Kelas itu sangat bersih sekali"</span>;
+});
+
+<span class="cm">// Route Home → memanggil view</span>
+<span class="cl">Route</span>::<span class="fn">get</span>(<span class="str">'/home'</span>, <span class="kw">function</span> () {
+    <span class="kw">return</span> <span class="fn">view</span>(<span class="str">'home'</span>);
+});</code></pre>
+    </div>
+
+    <div class="section-label">Views Blade</div>
+    <div class="code-wrap">
+      <div class="code-label">resources/views/about.blade.php</div>
+      <pre><code>di about kita akan melihat tentang saya</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">resources/views/kelas.blade.php</div>
+      <pre><code>Ini adalah kelas saya, sangat bagus kan</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">resources/views/home.blade.php</div>
+      <pre><code>ini adalah beranda, disini kita akan melihat tampilan awal</code></pre>
+    </div>
+
+    <div class="section-label">Analisis: Cara Kirim Data ke View</div>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h4>Cara 1 — Array Asosiatif</h4>
+        <ul>
+          <li>Terorganisir rapi dalam 1 variabel</li>
+          <li>Mudah dikembangkan (scalable)</li>
+          <li>Konsisten dengan pattern Laravel</li>
+          <li>Lebih mudah dibaca</li>
+          <li><em style="color:var(--pink-300)">−</em> Harus buat array manual dulu</li>
+          <li><em style="color:var(--pink-300)">−</em> Kurang fleksibel untuk data terpisah</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h4>Cara 2 — compact()</h4>
+        <ul>
+          <li>Syntax lebih ringkas dan cepat</li>
+          <li>Tidak perlu buat array manual</li>
+          <li>Praktis untuk data sedikit</li>
+          <li><em style="color:var(--pink-300)">−</em> Kurang terorganisir jika banyak data</li>
+          <li><em style="color:var(--pink-300)">−</em> Rawan error jika variabel tidak ada</li>
+          <li><em style="color:var(--pink-300)">−</em> Sulit dikembangkan jika data bertambah</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SESI 23 — Database Migration
+══════════════════════════════════════ -->
+<div class="session-card" id="s23" style="animation-delay:0.2s">
+  <div class="card-header">
+    <div class="session-num">23</div>
+    <div class="card-title-wrap">
+      <h2>Database Migration</h2>
+      <p>Membuat &amp; memodifikasi tabel database via migration</p>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="tags">
+      <span class="tag">Migration</span>
+      <span class="tag">Schema</span>
+      <span class="tag">Blueprint</span>
+      <span class="tag">Rollback</span>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 1</strong>
+      Buat migrasi baru untuk tabel <code>t_percobaan</code> dengan minimal 15 field yang berbeda.
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">database/migrations/...create_t_percobaan.php</div>
+      <pre><code><span class="cl">Schema</span>::<span class="fn">create</span>(<span class="str">'t_percobaan'</span>, <span class="kw">function</span> (<span class="cl">Blueprint</span> $table) {
+    $table-><span class="fn">id</span>();
+    $table-><span class="fn">string</span>(<span class="str">'nis'</span>, <span class="str">20</span>)-><span class="fn">unique</span>();
+    $table-><span class="fn">string</span>(<span class="str">'nama_lengkap'</span>, <span class="str">100</span>);
+    $table-><span class="fn">char</span>(<span class="str">'jenis_kelamin'</span>, <span class="str">1</span>);
+    $table-><span class="fn">date</span>(<span class="str">'tanggal_lahir'</span>);
+    $table-><span class="fn">string</span>(<span class="str">'tempat_lahir'</span>, <span class="str">50</span>);
+    $table-><span class="fn">string</span>(<span class="str">'email'</span>)-><span class="fn">unique</span>();
+    $table-><span class="fn">string</span>(<span class="str">'no_hp'</span>, <span class="str">15</span>)-><span class="fn">nullable</span>();
+    $table-><span class="fn">text</span>(<span class="str">'alamat'</span>);
+    $table-><span class="fn">string</span>(<span class="str">'kelas'</span>, <span class="str">10</span>);
+    $table-><span class="fn">string</span>(<span class="str">'jurusan'</span>, <span class="str">50</span>)-><span class="fn">nullable</span>();
+    $table-><span class="fn">enum</span>(<span class="str">'agama'</span>, [<span class="str">'Islam'</span>,<span class="str">'Kristen'</span>,<span class="str">'Katolik'</span>,<span class="str">'Hindu'</span>,<span class="str">'Buddha'</span>,<span class="str">'Konghucu'</span>]);
+    $table-><span class="fn">boolean</span>(<span class="str">'beasiswa'</span>)-><span class="fn">default</span>(<span class="kw">false</span>);
+    $table-><span class="fn">string</span>(<span class="str">'username'</span>, <span class="str">50</span>)-><span class="fn">unique</span>();
+    $table-><span class="fn">string</span>(<span class="str">'password'</span>);
+    $table-><span class="fn">timestamp</span>(<span class="str">'terakhir_login'</span>)-><span class="fn">nullable</span>();
+    $table-><span class="fn">timestamps</span>();
+});</code></pre>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 2</strong>
+      Membuat &amp; memodifikasi tabel <code>t_kelas</code> secara bertahap melalui 5 migration.
+    </div>
+
+    <div class="section-label">No.1 — Buat Tabel t_kelas</div>
+    <div class="code-wrap">
+      <div class="code-label">create_t_kelas</div>
+      <pre><code><span class="cl">Schema</span>::<span class="fn">create</span>(<span class="str">'t_kelas'</span>, <span class="kw">function</span> (<span class="cl">Blueprint</span> $table) {
+    $table-><span class="fn">id</span>();
+    $table-><span class="fn">string</span>(<span class="str">'nama_kelas'</span>);
+    $table-><span class="fn">string</span>(<span class="str">'jurusan'</span>);
+    $table-><span class="fn">timestamps</span>();
+});</code></pre>
+    </div>
+
+    <div class="section-label">No.2 — Tambah Field lokasi_ruangan</div>
+    <div class="code-wrap">
+      <div class="code-label">add_lokasi_ruangan_to_t_kelas</div>
+      <pre><code>$table-><span class="fn">string</span>(<span class="str">'lokasi_ruangan'</span>, <span class="str">100</span>)-><span class="fn">after</span>(<span class="str">'jurusan'</span>);</code></pre>
+    </div>
+
+    <div class="section-label">No.3 — Ubah Panjang lokasi_ruangan → 50</div>
+    <div class="code-wrap">
+      <div class="code-label">change_lokasi_ruangan_length</div>
+      <pre><code>$table-><span class="fn">string</span>(<span class="str">'lokasi_ruangan'</span>, <span class="str">50</span>)-><span class="fn">change</span>();</code></pre>
+    </div>
+
+    <div class="section-label">No.4 — Tambah nama_walkel</div>
+    <div class="code-wrap">
+      <div class="code-label">add_nama_walkel_to_t_kelas</div>
+      <pre><code>$table-><span class="fn">string</span>(<span class="str">'nama_walkel'</span>, <span class="str">50</span>)-><span class="fn">after</span>(<span class="str">'lokasi_ruangan'</span>);</code></pre>
+    </div>
+
+    <div class="section-label">No.5 — Rename nama_walkel → nama_wali_kelas</div>
+    <div class="code-wrap">
+      <div class="code-label">rename_nama_walkel_in_t_kelas</div>
+      <pre><code><span class="kw">if</span> (<span class="cl">Schema</span>::<span class="fn">hasColumn</span>(<span class="str">'t_kelas'</span>, <span class="str">'nama_walkel'</span>)) {
+    $table-><span class="fn">renameColumn</span>(<span class="str">'nama_walkel'</span>, <span class="str">'nama_wali_kelas'</span>);
+}</code></pre>
+    </div>
+
+    <div class="section-label">Hasil Akhir Struktur Tabel t_kelas</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nama Field</th><th>Tipe</th><th>Keterangan</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>id</td><td>bigint(20) UNSIGNED</td><td>AUTO_INCREMENT, Primary Key</td></tr>
+          <tr><td>2</td><td>nama_kelas</td><td>varchar(255)</td><td></td></tr>
+          <tr><td>3</td><td>jurusan</td><td>varchar(255)</td><td></td></tr>
+          <tr><td>4</td><td>lokasi_ruangan</td><td>varchar(50)</td><td>diubah dari 100</td></tr>
+          <tr><td>5</td><td>nama_wali_kelas</td><td>varchar(50)</td><td>direname dari nama_walkel</td></tr>
+          <tr><td>6</td><td>created_at</td><td>timestamp</td><td>nullable</td></tr>
+          <tr><td>7</td><td>updated_at</td><td>timestamp</td><td>nullable</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SESI 24 — Controller & Facade DB
+══════════════════════════════════════ -->
+<div class="session-card" id="s24" style="animation-delay:0.3s">
+  <div class="card-header">
+    <div class="session-num">24</div>
+    <div class="card-title-wrap">
+      <h2>Controller &amp; Facade DB</h2>
+      <p>Menghubungkan Route → Controller → View dengan query data</p>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="tags">
+      <span class="tag">Controller</span>
+      <span class="tag">DB Facade</span>
+      <span class="tag">Query Builder</span>
+      <span class="tag">ORDER BY</span>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 1</strong>
+      Pindahkan 3 route yang sebelumnya dibuat di routes ke <code>SiswaController</code>.
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">app/Http/Controllers/SiswaController.php</div>
+      <pre><code><span class="kw">function</span> <span class="fn">about</span>() {
+    <span class="kw">return</span> <span class="fn">view</span>(<span class="str">'About'</span>);
+}
+
+<span class="kw">function</span> <span class="fn">kelas</span>() {
+    <span class="kw">return</span> <span class="fn">view</span>(<span class="str">'Kelas'</span>);
+}
+
+<span class="kw">function</span> <span class="fn">home</span>() {
+    <span class="cm">// dipindah dari route langsung</span>
+}</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">routes/web.php — setelah dipindah</div>
+      <pre><code><span class="cl">Route</span>::<span class="fn">get</span>(<span class="str">'/About'</span>, [<span class="cl">SiswaController</span>::<span class="kw">class</span>, <span class="str">'about'</span>]);
+<span class="cl">Route</span>::<span class="fn">get</span>(<span class="str">'/Kelas'</span>, [<span class="cl">SiswaController</span>::<span class="kw">class</span>, <span class="str">'kelas'</span>]);
+<span class="cl">Route</span>::<span class="fn">get</span>(<span class="str">'/Home'</span>,  [<span class="cl">SiswaController</span>::<span class="kw">class</span>, <span class="str">'home'</span>]);</code></pre>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 2</strong>
+      Isi 15 data dummy t_kelas (kelas XI SMK Negeri 4 Bandung, semua jurusan), buat KelasController &amp; tampilkan datanya.
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">KelasController.php — index()</div>
+      <pre><code><span class="kw">public function</span> <span class="fn">index</span>() {
+    $semua_kelas = <span class="cl">DB</span>::<span class="fn">table</span>(<span class="str">'t_kelas'</span>)
+        -><span class="fn">orderBy</span>(<span class="str">'nama_kelas'</span>, <span class="str">'ASC'</span>)
+        -><span class="fn">get</span>();
+    <span class="kw">return</span> <span class="fn">view</span>(<span class="str">'Kelas.Kelas'</span>, <span class="fn">compact</span>(<span class="str">'semua_kelas'</span>));
+}</code></pre>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 3</strong>
+      Lakukan berbagai query pada t_kelas.
+    </div>
+
+    <div class="section-label">Query-query t_kelas</div>
+    <div class="code-wrap">
+      <div class="code-label">No.1 — Urutkan berdasarkan lokasi_ruangan</div>
+      <pre><code><span class="cl">DB</span>::<span class="fn">table</span>(<span class="str">'t_kelas'</span>)-><span class="fn">orderBy</span>(<span class="str">'lokasi_ruangan'</span>)-><span class="fn">get</span>();</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">No.2 — Nama wali kelas diawali huruf A</div>
+      <pre><code><span class="cl">DB</span>::<span class="fn">table</span>(<span class="str">'t_kelas'</span>)-><span class="fn">where</span>(<span class="str">'nama_wali_kelas'</span>, <span class="str">'LIKE'</span>, <span class="str">'A%'</span>)-><span class="fn">get</span>();</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">No.3 — Urutkan berdasarkan jurusan &amp; nama_kelas</div>
+      <pre><code><span class="cl">DB</span>::<span class="fn">table</span>(<span class="str">'t_kelas'</span>)
+    -><span class="fn">orderBy</span>(<span class="str">'jurusan'</span>)
+    -><span class="fn">orderBy</span>(<span class="str">'nama_kelas'</span>)
+    -><span class="fn">get</span>();</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label">No.4 — Hanya jurusan Rekayasa Perangkat Lunak</div>
+      <pre><code><span class="cl">DB</span>::<span class="fn">table</span>(<span class="str">'t_kelas'</span>)
+    -><span class="fn">where</span>(<span class="str">'jurusan'</span>, <span class="str">'Rekayasa Perangkat Lunak'</span>)
+    -><span class="fn">get</span>();</code></pre>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SESI 25 — Create Data
+══════════════════════════════════════ -->
+<div class="session-card" id="s25" style="animation-delay:0.35s">
+  <div class="card-header">
+    <div class="session-num">25</div>
+    <div class="card-title-wrap">
+      <h2>Create Data with Facade DB</h2>
+      <p>Form tambah data, validasi, success/error feedback &amp; old value</p>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="tags">
+      <span class="tag">Form</span>
+      <span class="tag">Validasi</span>
+      <span class="tag">Session Flash</span>
+      <span class="tag">old()</span>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 1</strong>
+      Buat form tambah data kelas beserta success/error message feedback.
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">resources/views/Kelas/form.blade.php — Form Tambah/Edit</div>
+      <pre><code><span class="kw">&lt;form</span> <span class="fn">action</span>=<span class="str">"{{ isset($kelas) ? route('kelas.update', $kelas->id) : route('kelas.store') }}"</span>
+      <span class="fn">method</span>=<span class="str">"POST"</span><span class="kw">&gt;</span>
+    @csrf
+    @if(isset($kelas)) @method(<span class="str">'PUT'</span>) @endif
+
+    <span class="kw">&lt;input</span> <span class="fn">type</span>=<span class="str">"text"</span> <span class="fn">name</span>=<span class="str">"nama_kelas"</span>
+           <span class="fn">value</span>=<span class="str">"{{ old('nama_kelas', $kelas->nama_kelas ?? '') }}"</span><span class="kw">&gt;</span>
+
+    <span class="kw">&lt;input</span> <span class="fn">type</span>=<span class="str">"text"</span> <span class="fn">name</span>=<span class="str">"jurusan"</span>
+           <span class="fn">value</span>=<span class="str">"{{ old('jurusan', $kelas->jurusan ?? '') }}"</span><span class="kw">&gt;</span>
+
+    <span class="kw">&lt;button</span> <span class="fn">type</span>=<span class="str">"submit"</span><span class="kw">&gt;</span>
+        {{ isset($kelas) ? <span class="str">'Update Data'</span> : <span class="str">'Simpan Data'</span> }}
+    <span class="kw">&lt;/button&gt;</span>
+<span class="kw">&lt;/form&gt;</span></code></pre>
+    </div>
+
+    <div class="section-label">Success / Error Message Feedback</div>
+    <div class="code-wrap">
+      <div class="code-label">views — session feedback</div>
+      <pre><code>@if(session(<span class="str">'success'</span>))
+    <span class="kw">&lt;div</span> <span class="fn">class</span>=<span class="str">"alert alert-success"</span><span class="kw">&gt;</span>
+        {{ session(<span class="str">'success'</span>) }}
+    <span class="kw">&lt;/div&gt;</span>
+@endif
+
+@if($errors->any())
+    <span class="kw">&lt;ul&gt;</span>
+        @foreach($errors->all() <span class="kw">as</span> $error)
+            <span class="kw">&lt;li&gt;</span>{{ $error }}<span class="kw">&lt;/li&gt;</span>
+        @endforeach
+    <span class="kw">&lt;/ul&gt;</span>
+@endif</code></pre>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 2</strong>
+      Implementasikan validasi untuk tabel t_kelas.
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">KelasController — validasi di store()</div>
+      <pre><code>$request-><span class="fn">validate</span>([
+    <span class="str">'nama_kelas'</span>     => <span class="str">'required'</span>,
+    <span class="str">'jurusan'</span>        => <span class="str">'required'</span>,
+    <span class="str">'lokasi_ruangan'</span> => <span class="str">'required'</span>,
+    <span class="str">'nama_wali_kelas'</span>=> <span class="str">'required'</span>,
+]);</code></pre>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 3</strong>
+      Implementasikan User's Old Value untuk input field jk dan golongan_darah.
+    </div>
+    <div class="answer-box">
+      Menggunakan helper <code>old('field_name')</code> di dalam atribut <code>value</code> atau <code>selected</code> pada elemen form. Fungsi <code>old()</code> mengambil nilai lama dari session sebelumnya ketika validasi gagal, sehingga user tidak perlu mengisi ulang form dari awal.
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SESI 26 — Edit & Delete
+══════════════════════════════════════ -->
+<div class="session-card" id="s26" style="animation-delay:0.4s">
+  <div class="card-header">
+    <div class="session-num">26</div>
+    <div class="card-title-wrap">
+      <h2>Edit &amp; Delete Data with Facade DB</h2>
+      <p>Fungsi update() dan destroy() pada Controller</p>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="tags">
+      <span class="tag">Edit</span>
+      <span class="tag">Delete</span>
+      <span class="tag">update()</span>
+      <span class="tag">destroy()</span>
+      <span class="tag">old()</span>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 1</strong>
+      Jelaskan isi dari fungsi update() dan destroy() pada SiswaController.
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h4>update()</h4>
+        <ul>
+          <li>Menerima input data baru dari form</li>
+          <li>Melakukan validasi data</li>
+          <li>Mencari record berdasarkan ID</li>
+          <li>Menyimpan perubahan ke database</li>
+          <li>Redirect dengan success message</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h4>destroy()</h4>
+        <ul>
+          <li>Menerima ID data yang dihapus</li>
+          <li>Mencari record berdasarkan ID</li>
+          <li>Menghapus record secara permanen</li>
+          <li>Bisa menggunakan soft delete</li>
+          <li>Redirect dengan success message</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 2</strong>
+      Implementasikan Edit dan Delete untuk tabel t_kelas.
+    </div>
+
+    <div class="section-label">edit() &amp; update() — KelasController</div>
+    <div class="code-wrap">
+      <div class="code-label">KelasController.php</div>
+      <pre><code><span class="kw">public function</span> <span class="fn">edit</span>($id) {
+    $kelas = <span class="cl">DB</span>::<span class="fn">table</span>(<span class="str">'t_kelas'</span>)-><span class="fn">where</span>(<span class="str">'id'</span>, $id)-><span class="fn">first</span>();
+    <span class="kw">return</span> <span class="fn">view</span>(<span class="str">'Kelas.form'</span>, <span class="fn">compact</span>(<span class="str">'kelas'</span>));
+}
+
+<span class="kw">public function</span> <span class="fn">update</span>(<span class="cl">Request</span> $request, $id) {
+    $request-><span class="fn">validate</span>([
+        <span class="str">'nama_kelas'</span>      => <span class="str">'required'</span>,
+        <span class="str">'jurusan'</span>         => <span class="str">'required'</span>,
+        <span class="str">'lokasi_ruangan'</span>  => <span class="str">'required'</span>,
+        <span class="str">'nama_wali_kelas'</span> => <span class="str">'required'</span>,
+    ]);
+    <span class="cl">DB</span>::<span class="fn">table</span>(<span class="str">'t_kelas'</span>)-><span class="fn">where</span>(<span class="str">'id'</span>, $id)-><span class="fn">update</span>([
+        <span class="str">'nama_kelas'</span>      => $request->nama_kelas,
+        <span class="str">'jurusan'</span>         => $request->jurusan,
+        <span class="str">'Nama_Wali_Kelas'</span> => $request->nama_wali_kelas,
+        <span class="str">'Lokasi_Ruangan'</span>  => $request->lokasi_ruangan,
+    ]);
+    <span class="kw">return</span> <span class="fn">redirect</span>()-><span class="fn">route</span>(<span class="str">'kelas.index'</span>)
+        -><span class="fn">with</span>(<span class="str">'success'</span>, <span class="str">'Data berhasil diperbarui!'</span>);
+}
+
+<span class="kw">public function</span> <span class="fn">destroy</span>($id) {
+    <span class="cl">DB</span>::<span class="fn">table</span>(<span class="str">'t_kelas'</span>)-><span class="fn">where</span>(<span class="str">'id'</span>, $id)-><span class="fn">delete</span>();
+    <span class="kw">return</span> <span class="fn">redirect</span>()-><span class="fn">route</span>(<span class="str">'kelas.index'</span>)
+        -><span class="fn">with</span>(<span class="str">'success'</span>, <span class="str">'Data berhasil dihapus'</span>);
+}</code></pre>
+    </div>
+
+    <div class="section-label">Tombol Delete di View</div>
+    <div class="code-wrap">
+      <div class="code-label">resources/views/Kelas/index.blade.php</div>
+      <pre><code><span class="kw">&lt;form</span> <span class="fn">action</span>=<span class="str">"{{ route('kelas.destroy', $kelas->id) }}"</span>
+      <span class="fn">method</span>=<span class="str">"POST"</span>
+      <span class="fn">onsubmit</span>=<span class="str">"return confirm('Anda yakin ingin menghapus data ini?');"</span><span class="kw">&gt;</span>
+    @csrf
+    @method(<span class="str">'DELETE'</span>)
+    <span class="kw">&lt;button</span> <span class="fn">type</span>=<span class="str">"submit"</span> <span class="fn">class</span>=<span class="str">"btn-delete"</span><span class="kw">&gt;</span>Hapus<span class="kw">&lt;/button&gt;</span>
+<span class="kw">&lt;/form&gt;</span></code></pre>
+    </div>
+
+    <div class="section-label">Tampilan Data Kelas</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nama Kelas</th><th>Jurusan</th><th>Nama Wali Kelas</th><th>Lokasi</th><th>Aksi</th></tr></thead>
+        <tbody>
+          <tr><td>XI DKV 2</td><td>Desain Komunikasi Visual</td><td>Pak Budi</td><td>E.25</td><td>✏ Edit &nbsp; 🗑 Hapus</td></tr>
+          <tr><td>XI DKV 3</td><td>Desain Komunikasi Visual</td><td>Bu Dewi</td><td>A.26</td><td>✏ Edit &nbsp; 🗑 Hapus</td></tr>
+          <tr><td>XI RPL 1</td><td>Rekayasa Perangkat Lunak</td><td>Pak Joko</td><td>A.21</td><td>✏ Edit &nbsp; 🗑 Hapus</td></tr>
+          <tr><td>XI RPL 2</td><td>Rekayasa Perangkat Lunak</td><td>Bu Rina</td><td>B.22</td><td>✏ Edit &nbsp; 🗑 Hapus</td></tr>
+          <tr><td>XI TKJ 1</td><td>Teknik Komputer dan Jaringan</td><td>Pak Andi</td><td>B.27</td><td>✏ Edit &nbsp; 🗑 Hapus</td></tr>
+          <tr><td>XI TITL 1</td><td>Ketenagalistrikan</td><td>Bu Ayu</td><td>E.30</td><td>✏ Edit &nbsp; 🗑 Hapus</td></tr>
+          <tr><td>XI TAV 1</td><td>Teknik Audio Video</td><td>Bu Fitri</td><td>B.32</td><td>✏ Edit &nbsp; 🗑 Hapus</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SESI 27 — Eloquent ORM
+══════════════════════════════════════ -->
+<div class="session-card" id="s27" style="animation-delay:0.45s">
+  <div class="card-header">
+    <div class="session-num">27</div>
+    <div class="card-title-wrap">
+      <h2>Eloquent ORM</h2>
+      <p>Model, mass assignment, CRUD menggunakan ORM</p>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="tags">
+      <span class="tag">Eloquent</span>
+      <span class="tag">Model</span>
+      <span class="tag">$fillable</span>
+      <span class="tag">ORM</span>
+      <span class="tag">Mass Assignment</span>
+    </div>
+
+    <div class="explain-box">
+      <div class="explain-item">
+        <h4>$table</h4>
+        <p>Variabel untuk menentukan nama tabel pada database yang digunakan oleh model ini.</p>
+      </div>
+      <div class="explain-item">
+        <h4>$fillable</h4>
+        <p>Variabel untuk menentukan field apa saja yang boleh di-fill / di-insert melalui mass assignment.</p>
+      </div>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 1</strong>
+      Lakukan CRUD (Create, Edit, Delete) untuk tabel t_kelas menggunakan Eloquent.
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">app/Models/Kelas.php</div>
+      <pre><code><span class="kw">namespace</span> App\Models;
+<span class="kw">use</span> <span class="cl">Illuminate\Database\Eloquent\Model</span>;
+
+<span class="kw">class</span> <span class="cl">Kelas</span> <span class="kw">extends</span> <span class="cl">Model</span> {
+    <span class="kw">public</span> $table = <span class="str">'t_kelas'</span>;
+    <span class="kw">protected</span> $fillable = [<span class="str">'nama_kelas'</span>, <span class="str">'jurusan'</span>, <span class="str">'lokasi_ruangan'</span>, <span class="str">'nama_wali_kelas'</span>];
+}</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">KelasController.php — Eloquent CRUD</div>
+      <pre><code><span class="cm">// index</span>
+$semua_kelas = <span class="cl">Kelas</span>::<span class="fn">all</span>();
+
+<span class="cm">// store</span>
+$kelas = <span class="kw">new</span> <span class="cl">Kelas</span>();
+$kelas->nama_kelas = $request->nama_kelas;
+$kelas-><span class="fn">save</span>();
+
+<span class="cm">// edit</span>
+$kelas = <span class="cl">Kelas</span>::<span class="fn">find</span>($id);
+
+<span class="cm">// update</span>
+$kelas = <span class="cl">Kelas</span>::<span class="fn">find</span>($id);
+$kelas->nama_kelas = $request->nama_kelas;
+$kelas-><span class="fn">save</span>();
+
+<span class="cm">// destroy</span>
+$kelas = <span class="cl">Kelas</span>::<span class="fn">find</span>($id);
+$kelas-><span class="fn">delete</span>();</code></pre>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 2</strong>
+      Buat tabel t_guru (nip, nama_guru, jenis_kelamin, alamat) + migration + CRUD menggunakan ORM.
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">app/Models/Guru.php</div>
+      <pre><code><span class="kw">class</span> <span class="cl">Guru</span> <span class="kw">extends</span> <span class="cl">Model</span> {
+    <span class="kw">use</span> <span class="cl">HasFactory</span>;
+    <span class="kw">protected</span> $table    = <span class="str">'t_guru'</span>;
+    <span class="kw">protected</span> $fillable = [<span class="str">'nip'</span>, <span class="str">'nama_guru'</span>, <span class="str">'mata_pelajaran'</span>, <span class="str">'alamat'</span>];
+}</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label">GuruController.php — store() dengan ORM create()</div>
+      <pre><code><span class="kw">public function</span> <span class="fn">store</span>(<span class="cl">Request</span> $request) {
+    $rule = [
+        <span class="str">'nip'</span>            => <span class="str">'required|string|unique:t_guru,nip'</span>,
+        <span class="str">'nama_guru'</span>      => <span class="str">'required|string'</span>,
+        <span class="str">'mata_pelajaran'</span> => <span class="str">'required|string'</span>,
+        <span class="str">'alamat'</span>         => <span class="str">'required'</span>,
+    ];
+    $this-><span class="fn">validate</span>($request, $rule);
+    $status = <span class="cl">Guru</span>::<span class="fn">create</span>($request-><span class="fn">all</span>());
+
+    <span class="kw">if</span> ($status) {
+        <span class="kw">return</span> <span class="fn">redirect</span>(<span class="str">'/guru'</span>)-><span class="fn">with</span>(<span class="str">'success'</span>, <span class="str">'Data guru berhasil ditambahkan'</span>);
+    }
+}
+
+<span class="kw">public function</span> <span class="fn">update</span>(<span class="cl">Request</span> $request, $id) {
+    $guru   = <span class="cl">Guru</span>::<span class="fn">findOrFail</span>($id);
+    $status = $guru-><span class="fn">update</span>($request-><span class="fn">all</span>());
+
+    <span class="kw">if</span> ($status) {
+        <span class="kw">return</span> <span class="fn">redirect</span>(<span class="str">'/guru'</span>)-><span class="fn">with</span>(<span class="str">'success'</span>, <span class="str">'Data guru berhasil diubah'</span>);
+    }
+}</code></pre>
+    </div>
+
+    <div class="section-label">Tampilan Data Guru</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>No</th><th>NIP</th><th>Nama Guru</th><th>Jenis Kelamin</th><th>Alamat</th><th>Aksi</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>00086868686</td><td>Ahmad Maulana</td><td>—</td><td>jln.Bandung 01</td><td>✏ Edit &nbsp; 🗑 Hapus</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="studi-kasus">
+      <strong>Studi Kasus 3</strong>
+      Jelaskan perbedaan signifikan antara DB Facade dan Eloquent.
+    </div>
+
+    <div class="quote">Eloquent ORM unggul dalam kemudahan penulisan dan manajemen relasi berbasis OOP namun lebih lambat, sementara DB Facade jauh lebih cepat dan hemat memori karena bekerja lebih dekat dengan SQL mentah namun kodenya lebih manual.</div>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h4>Eloquent ORM</h4>
+        <ul>
+          <li>Berbasis objek (OOP), lebih intuitif</li>
+          <li>Mudah mengelola relasi antar tabel</li>
+          <li>Kode lebih bersih dan readable</li>
+          <li>Mendukung event &amp; observer</li>
+          <li><em style="color:var(--pink-300)">−</em> Lebih lambat (overhead ORM)</li>
+          <li><em style="color:var(--pink-300)">−</em> Lebih boros memori</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h4>DB Facade</h4>
+        <ul>
+          <li>Lebih cepat, lebih dekat ke SQL</li>
+          <li>Hemat memori</li>
+          <li>Cocok untuk query kompleks</li>
+          <li>Performa tinggi untuk data besar</li>
+          <li><em style="color:var(--pink-300)">−</em> Kode lebih manual &amp; verbose</li>
+          <li><em style="color:var(--pink-300)">−</em> Relasi lebih sulit dikelola</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     RUBRIK PENILAIAN
+══════════════════════════════════════ -->
+<div class="session-card" style="animation-delay:0.5s">
+  <div class="card-header">
+    <div class="session-num" style="background:linear-gradient(135deg,#f9a8c9,#c9748a)">📋</div>
+    <div class="card-title-wrap">
+      <h2>Rubrik Penilaian</h2>
+      <p>Bobot penilaian yang berlaku untuk semua sesi</p>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Komponen</th><th>Bobot</th><th>Deskripsi</th></tr></thead>
+        <tbody>
+          <tr><td>Persiapan Kerja</td><td>10%</td><td>Instalasi tools, siapkan lingkungan kerja</td></tr>
+          <tr><td>Proses Kerja</td><td>50%</td><td>Mengerjakan praktikum &amp; studi kasus</td></tr>
+          <tr><td>Hasil Kerja</td><td>20%</td><td>Kelengkapan &amp; kesesuaian laporan</td></tr>
+          <tr><td>Sikap</td><td>10%</td><td>Mandiri, percaya diri, tidak menyontek</td></tr>
+          <tr><td>Waktu</td><td>10%</td><td>Menyelesaikan tepat/sebelum waktu</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="answer-box" style="text-align:center;font-family:'Playfair Display',serif;font-size:1rem;">
+      Nilai = (∑ Skor Perolehan / Skor Maksimal) × Bobot
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <span class="logo">Gita Nopianti</span>
+  XI RPL 1 &nbsp;·&nbsp; Pemrograman Web &nbsp;·&nbsp; Sesi 22–27 &nbsp;·&nbsp; Laravel<br>
+  <br>Dibuat dengan <span class="heart">♥</span> dan semangat belajar
+</footer>
+
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  // Progress bar
+  const prog = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    prog.style.width = pct + '%';
+    document.getElementById('btt').classList.toggle('show', window.scrollY > 300);
+  });
+
+  // Nav active
+  const cards = document.querySelectorAll('.session-card[id]');
+  const navLinks = document.querySelectorAll('nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+  cards.forEach(c => observer.observe(c));
+</script>
+</body>
+</html>
